@@ -1,0 +1,22 @@
+{
+  "actor": "caffein.dev/ebay-sold-listings",
+  "ebay_site": "ebay.com",
+  "price_per_1000_results_usd": 2.5,
+  "max_budget_usd_per_run": 15,
+  "backfill": { "days": 90, "count": 600 },
+  "daily": { "days": 2, "count": 100 },
+  "queries": [
+    "lorcana PSA 10",
+    "lorcana enchanted PSA 10",
+    "lorcana iconic PSA 10",
+    "lorcana BGS 9.5",
+    "lorcana enchanted BGS 9.5",
+    "lorcana iconic BGS 9.5",
+    "lorcana PCG 9.5",
+    "lorcana enchanted PCG 9.5",
+    "lorcana iconic PCG 9.5",
+    "lorcana enchanted",
+    "lorcana iconic"
+  ],
+  "analysis": { "window_days": 90, "min_sales_per_grade": 2, "top_n": 50 }
+}

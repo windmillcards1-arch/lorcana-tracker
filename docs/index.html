@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lorcana graded spreads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f4f7;--surface:#fff;--ink:#16202b;--muted:#5e6b78;--line:#d9dfe6;--psa:#1f4fd8;--other:#c9822b;--pos:#0e7a5f;--neg:#b3402d;--hover:#eef2f8}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1823;--surface:#162331;--ink:#e7edf3;--muted:#92a1b0;--line:#27384a;--psa:#6d8dff;--other:#e0a04f;--pos:#4cc7a5;--neg:#f08a77;--hover:#1b2b3c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:1100px;margin:0 auto;padding:28px 18px 56px}
+h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 22px;max-width:62ch}
+.stats{display:flex;flex-wrap:wrap;gap:10px 34px;margin:0 0 22px}
+.stats div{min-width:110px}.stats b{display:block;font-size:22px;font-weight:600}.stats span{color:var(--muted);font-size:13px}
+.controls{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:14px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+select,input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0}
+input[type=number]{width:84px}input[type=search]{width:200px}
+:focus-visible{outline:2px solid var(--psa);outline-offset:2px}
+.wrap{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th{font-weight:500;font-size:13px;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.row:hover{background:var(--hover)}tr:last-child td{border-bottom:0}
+.num{text-align:right;white-space:nowrap}th.num{text-align:right}
+td.num small{display:block;color:var(--muted);font-size:12px}
+.rk{color:var(--muted);width:34px}
+.name{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--ink);text-align:left;cursor:pointer}
+.name:hover{text-decoration:underline}
+.meta{display:block;color:var(--muted);font-size:12.5px}
+.dim{color:var(--muted)}
+.track{position:relative;height:20px;min-width:170px}
+.track i{position:absolute;top:50%;height:3px;margin-top:-1.5px;background:var(--line);border-radius:2px}
+.track b{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%}
+.gap{font-weight:600}.pos{color:var(--pos)}.neg{color:var(--neg)}
+.detail td{background:var(--bg);padding:12px 16px}
+.cols{display:flex;flex-wrap:wrap;gap:12px 36px}
+.cols h4{margin:0 0 4px;font-size:13px}
+.cols div{font-size:13px;line-height:1.7}
+.cols a{color:var(--psa)}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin:0 0 8px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:var(--c)}
+#msg{padding:22px 16px;color:var(--muted)}
+footer{margin-top:18px;color:var(--muted);font-size:13px;max-width:78ch}
+footer a{color:var(--psa)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Lorcana graded spreads</h1>
+  <p class="sub">Where a PSA 10 sells furthest above a BGS 9.5 or PCG 9.5 of the same card, based on eBay sold listings.</p>
+  <div class="stats">
+    <div><b id="s-sales">–</b><span>sales analyzed</span></div>
+    <div><b id="s-cards">–</b><span>cards with graded sales</span></div>
+    <div><b id="s-comp">–</b><span>cards comparable now</span></div>
+    <div><b id="s-upd">–</b><span>last updated</span></div>
+  </div>
+  <div class="controls">
+    <label>Compare PSA 10 with
+      <select id="cmp"><option value="either">Wider of BGS 9.5 or PCG 9.5</option><option value="BGS 9.5">BGS 9.5</option><option value="PCG 9.5">PCG 9.5</option></select></label>
+    <label>Minimum sales per grade<input id="min" type="number" min="1" max="20" value="2"></label>
+    <label>Rank by<select id="sort"><option value="gap">Dollar gap</option><option value="pct">Percent gap</option></select></label>
+    <label>Find a card<input id="q" type="search" placeholder="Name or set"></label>
+  </div>
+  <div class="legend"><span style="--c:var(--psa)">PSA 10</span><span style="--c:var(--other)">BGS 9.5 or PCG 9.5</span><span>Prices are medians; scale is logarithmic</span></div>
+  <div class="wrap">
+    <table>
+      <thead><tr><th>#</th><th>Card</th><th class="num">PSA 10</th><th class="num">BGS 9.5</th><th class="num">PCG 9.5</th><th>Spread</th><th class="num">Gap</th></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div id="msg">Loading…</div>
+  </div>
+  <footer id="foot"></footer>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const money=v=>v==null?'–':'$'+(v>=100?Math.round(v).toLocaleString('en-US'):v.toFixed(2));
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+let D,st={cmp:'either',min:2,sort:'gap',q:''};
+
+fetch('data/cards.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(init)
+ .catch(()=>{$('#msg').textContent='Could not load data/cards.json. Open this page from your GitHub Pages link, and confirm the daily update has run at least once.'});
+
+function init(d){
+  D=d;const m=d.meta;st.min=m.min_sales;$('#min').value=st.min;
+  $('#s-sales').textContent=m.sales_used.toLocaleString('en-US');
+  $('#s-cards').textContent=d.cards.length.toLocaleString('en-US');
+  $('#s-upd').textContent=m.updated.slice(0,10);
+  $('#foot').append(
+    'Source: completed eBay sales from the last '+m.window_days+' days, collected daily. Cards are matched from listing titles, so a few listings may be grouped or split incorrectly. ',
+    'BO means a Best Offer was accepted, A an auction, BIN Buy It Now. Lots, Japanese cards, jumbo cards and titles naming two grades are left out. ',
+    'You can also ',Object.assign(el('a',null,'download the shortlist as a spreadsheet'),{href:'data/top50.csv'}),'.');
+  ['cmp','sort'].forEach(k=>$('#'+k).addEventListener('change',e=>{st[k]=e.target.value;render()}));
+  $('#min').addEventListener('input',e=>{st.min=Math.max(1,+e.target.value||1);render()});
+  $('#q').addEventListener('input',e=>{st.q=e.target.value.trim().toLowerCase();render()});
+  render();
+}
+
+function compute(){
+  const out=[];
+  for(const c of D.cards){
+    const p=c.g['PSA 10'];if(!p||p.n<st.min)continue;
+    let best=null;
+    for(const k of ['BGS 9.5','PCG 9.5']){
+      if(st.cmp!=='either'&&st.cmp!==k)continue;
+      const o=c.g[k];if(!o||o.n<st.min)continue;
+      const gap=p.med-o.med,pct=gap/o.med*100,v=st.sort==='gap'?gap:pct;
+      if(!best||v>best.v)best={c,k,o,p,gap,pct,v};
+    }
+    if(best)out.push(best);
+  }
+  return out.sort((a,b)=>b.v-a.v);
+}
+
+function render(){
+  const all=compute();$('#s-comp').textContent=all.length.toLocaleString('en-US');
+  const list=all.filter(r=>!st.q||(r.c.name+' '+r.c.set+' '+r.c.variant).toLowerCase().includes(st.q)).slice(0,D.meta.top_n);
+  const body=$('#body');body.replaceChildren();
+  $('#msg').hidden=list.length>0;
+  if(!list.length){$('#msg').textContent=all.length?'No cards match that search.':'No cards have enough sales in both grades yet. Lower the minimum sales or check back after more daily updates.';return}
+  const vals=list.flatMap(r=>[r.p.med,r.o.med]),lo=Math.log(Math.min(...vals)),hi=Math.log(Math.max(...vals));
+  const pos=v=>4+((Math.log(v)-lo)/((hi-lo)||1))*92;
+  list.forEach((r,i)=>{
+    const c=r.c,tr=el('tr','row'),det=el('tr','detail');det.hidden=true;
+    tr.append(el('td','rk',i+1));
+    const nm=el('td'),b=el('button','name',c.name);b.setAttribute('aria-expanded','false');
+    nm.append(b,el('span','meta',[c.variant,c.set,c.number?'#'+c.number:''].filter(Boolean).join(', ')));tr.append(nm);
+    for(const k of ['PSA 10','BGS 9.5','PCG 9.5']){
+      const s=c.g[k],td=el('td','num');
+      if(s)td.append(el('span',k===r.k||k==='PSA 10'?'':'dim',money(s.med)),el('small',null,s.n+(s.n===1?' sale':' sales')));else td.append(el('span','dim','–'));
+      tr.append(td);
+    }
+    const sp=el('td'),tk=el('div','track'),a=pos(r.p.med),o=pos(r.o.med),seg=el('i');
+    seg.style.left=Math.min(a,o)+'%';seg.style.width=Math.abs(a-o)+'%';
+    const d1=el('b'),d2=el('b');d1.style.left=o+'%';d1.style.background='var(--other)';d2.style.left=a+'%';d2.style.background='var(--psa)';
+    tk.append(seg,d1,d2);sp.append(tk);tr.append(sp);
+    const g=el('td','num'),gv=el('span','gap '+(r.gap>=0?'pos':'neg'),(r.gap<0?'−':'+')+money(Math.abs(r.gap)));
+    g.append(gv,el('small',null,(r.pct>=0?'+':'−')+Math.abs(r.pct).toFixed(0)+'% vs '+r.k.split(' ')[0]));tr.append(g);
+    const dt=el('td');dt.colSpan=7;const cols=el('div','cols');
+    for(const k of ['PSA 10','BGS 9.5','PCG 9.5','RAW']){
+      const s=c.g[k];if(!s)continue;
+      const col=el('div'),h=el('h4',null,k==='RAW'?'Raw (ungraded)':k);col.append(h);
+      for(const [d,p,u,t] of s.sales){
+        const line=el('div',null,d+'  '+money(p)+'  '+t+'  ');
+        if(typeof u==='string'&&u.startsWith('https://www.ebay.com/'))line.append(Object.assign(el('a',null,'view'),{href:u,target:'_blank',rel:'noopener noreferrer'}));
+        col.append(line);
+      }
+      cols.append(col);
+    }
+    dt.append(cols);det.append(dt);
+    b.addEventListener('click',()=>{det.hidden=!det.hidden;b.setAttribute('aria-expanded',String(!det.hidden))});
+    body.append(tr,det);
+  });
+}
+</script>
+</body>
+</html>
