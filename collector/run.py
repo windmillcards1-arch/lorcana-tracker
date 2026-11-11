@@ -32,7 +32,7 @@ def main(mode):
         if spent + plan["count"] * per_result > CFG["max_budget_usd_per_run"]:
             print(f"Stopping before '{q}': the next search could exceed the budget."); break
         try:
-            run = client.actor(CFG["actor"]).call(timeout_secs=1800, run_input={
+            run = client.actor(CFG["actor"]).call(run_input={
                 "keywords": [q], "ebaySite": CFG["ebay_site"], "daysToScrape": plan["days"], "count": plan["count"],
                 "sortOrder": "endedRecently", "includeCompletedListings": True, "exactMatch": True})
             items = list(client.dataset(run["defaultDatasetId"]).iterate_items())
